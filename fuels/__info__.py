@@ -1,0 +1,6 @@
+__title__ = "fuels"
+__description__ = "fuels MVP"
+__url__ = "https://github.com/St-Voland/fuels"
+__version__ = "0.0.1"
+__author__ = "Georgiy Molyboga"
+__author_email__ = "St.George.Molyboga@gmail.com"
