@@ -4,9 +4,14 @@ from typing import Any, Dict
 import setuptools
 from setuptools import find_packages, setup
 
+# pip3 install google-api-python-client oauth2client
+
 REQUIRED = [
     "python-telegram-bot==13.11",
+    "google-api-python-client",
+    "oauth2client",
     "click>=7.1.2, <8.0.0",
+    "numpy"
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))
