@@ -1,10 +1,11 @@
 import logging
 
-from telegram import Update #, Location
+from telegram import Update  # , Location
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
 import json
 from .data_parse import PharmaciesInfo
+from .utils import parse_coords
 
 import numpy as np
 
@@ -15,18 +16,19 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+
 class FuelsBot:
-    def __init__(self, creds = "../TelegramBotCreds.json"):
+    def __init__(self, creds="../TelegramBotCreds.json"):
         with open(creds) as f:
             self.telegram_bot_info = json.load(f)
 
-            #verification integration will be done later!
-            self.verified_users = [] #self.telegram_bot_info["verified_users"]
+            # verification integration will be done later!
+            self.verified_users = []  # self.telegram_bot_info["verified_users"]
             self.blocked_users = []
 
-            self.meters_in_geo = 75000 # approximately ))
+            self.meters_in_geo = 75000  # approximately ))
             self.pharmacy_count = 5
-            self.pharmacy_radius_in_meters = 2000 # 2 km radius
+            self.pharmacy_radius_in_meters = 2000  # 2 km radius
 
             self.set_messages()
             self.pharmacies_info = PharmaciesInfo()
@@ -43,7 +45,6 @@ class FuelsBot:
             "Напішіть '/radius <x>' щоб бачити аптеки лише у радіусі <x> метрів(напр. /radius 2000)\n" +\
             f"Наразі, ви будете бачити не більше {self.pharmacy_count} аптек у радіусі {self.pharmacy_radius_in_meters} метрів."
         self.start_message_text = "Слава Україні!\n" + self.help_message_text
-
 
     def start(self, update: Update, context: CallbackContext) -> None:
         """Send a message when the command /start is issued."""
@@ -75,9 +76,12 @@ class FuelsBot:
         # get data from site
 
         pharmacies_info = self.pharmacies_info.get()
-        input_coords = np.array([update.message.location.latitude, update.message.location.longitude])
-        
-        nearest_sorted = sorted(pharmacies_info, key = lambda x: np.linalg.norm(x[2] - input_coords))
+        if update.message.location.latitude and update.message.location.longitude:
+            input_coords = np.array([update.message.location.latitude, update.message.location.longitude])
+        else:
+            input_coords = np.array(parse_coords(update.message.text))
+
+        nearest_sorted = sorted(pharmacies_info, key=lambda x: np.linalg.norm(x[2] - input_coords))
         nearest_count = self.pharmacy_count
 
         update.message.reply_text(self.pharmacy_message)
@@ -85,7 +89,7 @@ class FuelsBot:
             distance_in_meters = self.meters_in_geo * np.linalg.norm(nearest_sorted[i][2] - input_coords)
             if distance_in_meters < self.pharmacy_radius_in_meters:
                 update.message.reply_text(f"<{nearest_sorted[i][0]}> за адресою <{nearest_sorted[i][1]}>:")
-                update.message.reply_location(latitude = nearest_sorted[i][2][0], longitude = nearest_sorted[i][2][1])
+                update.message.reply_location(latitude=nearest_sorted[i][2][0], longitude=nearest_sorted[i][2][1])
             else:
                 update.message.reply_text(self.no_pharmacies_message)
                 break
@@ -95,7 +99,7 @@ class FuelsBot:
             # block functionality mock
             logger.info(f"user = {user} is blocked!")
             return
-        
+
         if update.message.from_user["id"] in self.verified_users:
             # admin functionality mock
             logger.info(f"user = {user} is verified!")
@@ -117,6 +121,7 @@ class FuelsBot:
 
         updater.start_polling()
         updater.idle()
+
 
 if __name__ == '__main__':
     bot = FuelsBot()
