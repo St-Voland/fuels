@@ -96,7 +96,7 @@ class PharmaciesInfo:
             self.pharmacies_info.append((name, address, np.array([latitude_val, longitude_val]))) # not sure that precision will be ok
 
         self.saved_hash = hashed_val        
-        # self._update_cache()
+        self._update_cache()
 
         return self.pharmacies_info
 
@@ -106,13 +106,13 @@ class PharmaciesInfo:
         else:
             return self.update()
 
-    # def _update_cache(self):
-    #     from copy import deepcopy
-    #     import time
-    #     self.is_cached = False
-    #     time.sleep(1) # ugly, but ok
-    #     self.cache = deepcopy(self.pharmacies_info)
-    #     self.is_cached = True
+    def _update_cache(self):
+        from copy import deepcopy
+        import time
+        self.is_cached = False
+        time.sleep(1) # ugly, but ok
+        self.cache = deepcopy(self.pharmacies_info)
+        self.is_cached = True
 
 if __name__ == '__main__':
     ph = PharmaciesInfo()

@@ -1,0 +1,1 @@
+from .bot_main_dispatcher import bot_main_dispatcher

@@ -1,13 +1,34 @@
+from dis import dis
+from linecache import cache
 import logging
+from xml.dom.pulldom import START_DOCUMENT
 
-from telegram import Update  # , Location
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+# from telegram import Update  # , Location
+# from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+
+from telegram import InlineKeyboardMarkup, InlineKeyboardButton, Update
+from telegram.ext import (
+    Updater,
+    CommandHandler,
+    MessageHandler,
+    Filters,
+    ConversationHandler,
+    CallbackQueryHandler,
+    CallbackContext,
+)
+
 
 import json
 from .data_parse import PharmaciesInfo
-from .utils import parse_coords
-
+from ..utils import parse_coords
 import numpy as np
+
+import pickle
+import pkg_resources
+mocked_db_path = pkg_resources.resource_filename("fuels", "mock_data/cached_db.pkl")
+
+with open(mocked_db_path, "rb") as f:
+    mocked_db = pickle.load(f)
 
 # Enable logging
 logging.basicConfig(
@@ -16,8 +37,7 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-
-class FuelsBot:
+class PharmacyBot:
     def __init__(self, creds="../TelegramBotCreds.json"):
         with open(creds) as f:
             self.telegram_bot_info = json.load(f)
@@ -31,7 +51,13 @@ class FuelsBot:
             self.pharmacy_radius_in_meters = 2000  # 2 km radius
 
             self.set_messages()
-            self.pharmacies_info = PharmaciesInfo()
+
+            # self.pharmacies_info = PharmaciesInfo()
+            # with open("cached_db.pkl", "wb") as f:
+            #     pickle.dump(self.pharmacies_info, f)
+            #     # mocked_db = pickle.load(f).get()
+            self.pharmacies_info = mocked_db
+
 
     def set_messages(self):
         self.pharmacy_radius_in_meters_text = "Будь ласка, вкажіть який радіус у метрах вас влаштовує."
@@ -105,11 +131,9 @@ class FuelsBot:
             logger.info(f"user = {user} is verified!")
             return
 
-    def main(self):
+    def setup_pharmacy_bot(self, dispatcher):
         """Start the bot."""
-        updater = Updater(self.telegram_bot_info["token"], use_context=True)
-
-        dispatcher = updater.dispatcher
+        # updater = Updater(self.telegram_bot_info["token"], use_context=True)
 
         dispatcher.add_handler(CommandHandler("start", self.start))
         dispatcher.add_handler(CommandHandler("help", self.help_command))
@@ -118,11 +142,20 @@ class FuelsBot:
 
         dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, self.help_command))
         dispatcher.add_handler(MessageHandler(Filters.location, self.nearest_stations))
-
-        updater.start_polling()
-        updater.idle()
+    
+        # updater.start_polling()
+        # updater.idle()
 
 
 if __name__ == '__main__':
-    bot = FuelsBot()
-    bot.main()
+    bot = PharmacyBot()
+
+    updater = Updater(bot.telegram_bot_info["token"], use_context=True)
+    
+    dispatcher = updater.dispatcher
+    dispatcher = bot.setup_pharmacy_bot(dispatcher)
+
+    updater.start_polling()
+    updater.idle()
+    
+

@@ -11,7 +11,8 @@ REQUIRED = [
     "google-api-python-client",
     "oauth2client",
     "click>=7.1.2, <8.0.0",
-    "numpy"
+    "numpy",
+    "lat_lon_parser"
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))
