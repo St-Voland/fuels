@@ -12,7 +12,13 @@ REQUIRED = [
     "oauth2client",
     "click>=7.1.2, <8.0.0",
     "numpy",
-    "lat_lon_parser"
+    "lat_lon_parser",
+    "sqlalchemy",
+    "geoalchemy2",
+    "shapely",
+    "pandas",
+    "openpyxl",
+    "psycopg2"
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))

@@ -1,5 +1,6 @@
 from .bot_common import *
-import pickle
+from ..db.db_helper import get_nearest
+
 
 def bot_detailed_info_message(context: CallbackContext):
     return "bot_detailed_info_message"
@@ -16,19 +17,20 @@ def bot_detailed_info(update: Update, context: CallbackContext) -> int:
 
     input_coords = context.user_data["input_location"]
 
-    nearest_sorted = sorted(mocked_db, key=lambda x: np.linalg.norm(x[2] - input_coords))
-    
+    nearest_sorted = get_nearest(*input_coords)
     print(f"i  = {i} has been chosen")
     context.user_data["input_choice"] = i
-    context.user_data["input_choice_data"] = nearest_sorted[i]
+    context.user_data["input_choice_data"] = nearest_sorted[i][0]
 
     update.callback_query.answer()
-    update.callback_query.edit_message_text(text=f"{nearest_sorted[i]}")
-    update.callback_query.message.reply_location(latitude=context.user_data["input_choice_data"][2][0], longitude=context.user_data["input_choice_data"][2][1])
+    update.callback_query.edit_message_text(text=f"{nearest_sorted[i][0].address}")
+    point = nearest_sorted[i][0].get_human_coordinates()
+    lat, long = point.x, point.y
+    update.callback_query.message.reply_location(latitude=lat, longitude=long)
 
     google_maps_link = "https://www.google.com/maps/dir/?api=1&" + \
         f"origin={context.user_data['input_location'][0]}%2C{context.user_data['input_location'][1]}&" + \
-        f"destination={context.user_data['input_choice_data'][2][0]}%2C{context.user_data['input_choice_data'][2][1]}&" + \
+        f"destination={lat}%2C{long}&" + \
         "travelmode=car"
     
     if context.user_data.get(EUserType.USER, False):
