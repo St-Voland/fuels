@@ -1,5 +1,9 @@
 # fuels
 
+# set up db
+sudo apt-get install libpq-dev libodbc1 postgresql postgresql-contrib postgresql-12-postgis-3 postgis
+python3 upload_okko.py
+
 # Install
 pipenv shell
 

@@ -1,5 +1,6 @@
 from .bot_common import *
-import pickle
+from ..db.db_helper import get_nearest
+
 
 def bot_show_stations_message(context: CallbackContext):
     return "bot_show_stations_message"
@@ -15,17 +16,18 @@ def bot_show_stations(update: Update, context: CallbackContext) -> int:
     input_range_step = context.user_data["input_location_range_step"]
     meters_in_geo = 75000
 
-    nearest_sorted = sorted(mocked_db, key=lambda x: np.linalg.norm(x[2] - input_coords))
+    nearest_sorted = get_nearest(*input_coords)
     buttons = []
 
     for i in range(input_range[0], input_range[1]):
         if i >= len(nearest_sorted):
             break
-        distance_in_meters = meters_in_geo * np.linalg.norm(nearest_sorted[i][2] - input_coords)
+        distance_in_meters = int(nearest_sorted[i][1])
+        azs_address = nearest_sorted[i][0].address
         # if distance_in_meters >= input_radius:
         #     break
 
-        button_name = f"{i}. {distance_in_meters} метрів, {nearest_sorted[i][1]}"
+        button_name = f"{i}. {distance_in_meters} метрів, {azs_address}"
         buttons.append([InlineKeyboardButton(text = button_name, callback_data=str(EStates.DETAILED_INFO) + str(i - input_range[0]))])
     
     if input_range[0] > 0:

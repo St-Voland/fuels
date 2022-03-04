@@ -12,11 +12,18 @@ def bot_send_location(update: Update, context: CallbackContext) -> int:
     if update.message.location:
         input_coords = np.array([update.message.location.latitude, update.message.location.longitude])
     else:
-        input_coords = np.array([53, 48]) #update.message.text #TODO: parse!!!
-    
+        input_coords = parse_location_input(update.message.text)
+
     context.user_data["input_location"] = input_coords
     context.user_data["input_location_radius"] = 2000
     context.user_data["input_location_range"] = (0,10)
     context.user_data["input_location_range_step"] = 10
 
     return bot_show_stations(update, context)
+
+
+def parse_location_input(inp_txt: str) -> np.array:
+    inp_arr = inp_txt.split(',')
+    x, y = float(inp_arr[0].strip()), float(inp_arr[1].strip())
+    input_coords = np.array([x, y])
+    return input_coords

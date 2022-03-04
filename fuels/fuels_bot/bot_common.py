@@ -20,12 +20,6 @@ from ..utils import parse_coords
 
 import numpy as np
 from ..pharmacy_bot.data_parse import PharmaciesInfo # only for mocked db
-import pickle
-import pkg_resources
-mocked_db_path = pkg_resources.resource_filename("fuels", "mock_data/cached_db.pkl")
-
-with open(mocked_db_path, "rb") as f:
-    mocked_db = pickle.load(f).get()
 
 # Enable logging
 logging.basicConfig(
